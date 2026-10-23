@@ -1,0 +1,11 @@
+# HTTPS waits for the GO Hub hostname and DNS.
+:80 {
+	handle /api/* {
+		reverse_proxy 127.0.0.1:3000
+	}
+	handle {
+		root * /var/www/gohub
+		try_files {path} /index.html
+		file_server
+	}
+}

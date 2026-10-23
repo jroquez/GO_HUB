@@ -1,0 +1,23 @@
+[Unit]
+Description=GO Hub API
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=gohubapp
+Group=gohubapp
+WorkingDirectory=/opt/gohub/api
+EnvironmentFile=/etc/gohub/database.env
+EnvironmentFile=/etc/gohub/planning-center.env
+Environment=HOST=127.0.0.1
+Environment=PORT=3000
+Environment=COOKIE_SECURE=false
+ExecStart=/usr/bin/node dist/index.js
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+MemoryMax=300M
+
+[Install]
+WantedBy=multi-user.target

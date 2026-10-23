@@ -8,7 +8,7 @@
 **Plan:** Nanode 1 GB  
 **Cloud firewall:** `MainFW`  
 **Access:** `ssh go-hub` as root, ED25519 key `renova-hub-linode`  
-**Status:** Read-only audit completed. No packages, users, firewall rules, or SSH settings were changed.
+**Status:** Read-only audit completed on 23 October 2026. Approved hardening was applied afterward. See section 11.
 
 ## 1. Guest operating system
 
@@ -123,4 +123,19 @@ cron, dbus, getty, haveged, networkd-dispatcher, rsyslog, serial getty, ssh, jou
 
 The read-only audit is complete. Phase 0 hardening is not. Ubuntu 24.04 is not what is installed. SSH still uses root, password authentication is on, UFW is inactive, update freshness is unconfirmed, and backups are undefined.
 
-No packages were installed. SSH settings, firewall rules, databases, and application code on the server were not changed. The Linode instance was not deleted. No additional server or paid service was provisioned.
+No packages were installed during the audit. SSH settings, firewall rules, databases, and application code on the server were not changed during the audit. The Linode instance was not deleted. No additional server or paid service was provisioned.
+
+## 11. Hardening applied after approval
+
+Applied on 23 October 2026 and checked again after reboot. The guest remains Ubuntu 22.04.5 LTS. Node.js, PostgreSQL, and Caddy were not installed.
+
+- `apt-get update` and `apt-get upgrade` completed. A reboot was required for `libc6`. After reboot, `/var/run/reboot-required` was gone and the running kernel was still `5.15.0-185-generic`.
+- User `gohub` exists, password locked, same ED25519 key as root had, `sudo` without a password.
+- A separate SSH session as `gohub` succeeded before root login was disabled.
+- `/etc/ssh/sshd_config.d/00-gohub-hardening.conf` sets `PermitRootLogin no`, `PasswordAuthentication no`, and `X11Forwarding no`. Root SSH now returns `Permission denied (publickey)`.
+- UFW is active: incoming deny, allow 22, 80, and 443. `MainFW` was not changed.
+- `ssh go-hub` on this Mac now logs in as `gohub`.
+
+Details: [SSH_SECURITY.md](SSH_SECURITY.md) and [FIREWALL.md](FIREWALL.md).
+
+Still open before the application: hostname for HTTPS, off-server backups, and a tested restore. Real membership data stays off this server until those exist.
